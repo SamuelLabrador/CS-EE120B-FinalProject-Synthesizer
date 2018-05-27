@@ -8,16 +8,16 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <math.h>
-
+#include <stdlib.h>
 volatile unsigned char TimerFlag = 0;
 
 unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
 
 void TimerOn(){
-	TCCR1B  = 0x0A;
-	OCR1A = 100;	//should call to ISR every 100 microseconds 
-	TIMSK1 = 0x02;
+	TCCR1B  = 0x0A;		//1000000 Ticks Per Second
+	OCR1A = 1;			//should call to ISR every 10 microseconds
+	TIMSK1 = 0x02;		
 	TCNT1 = 0;
 	_avr_timer_cntcurr = _avr_timer_M;
 	SREG |= 0x80;	//enable interrupts via SREG
@@ -44,10 +44,10 @@ void TimerSet(unsigned long M){
 	_avr_timer_cntcurr = _avr_timer_M;
 }
 
-void fillArray(unsigned short *array);
+void fillArray(unsigned short * array);
 
-#define SAMPLE_RATE (unsigned short)(1000)						//Rate at which ports A and B will be updated
-#define SAMPLE_PERIOD (unsigned short)(10000 / SAMPLE_RATE)		//ISR triggers every 100 microseconds
+#define SAMPLE_RATE (unsigned long)(10)						//Rate at which ports A and B will be updated
+#define SAMPLE_PERIOD (unsigned long)(100000 / SAMPLE_RATE)		//1 second = 100000 ticks
 #define VOLTAGE_SCALER (unsigned short)(13107)
 
 int main(void)
@@ -64,20 +64,28 @@ int main(void)
 	
 	unsigned short output = 0x00;
 	unsigned char lights = 0xFF;
+	unsigned short timer = 0x00;
 	unsigned short i = 0;
+	unsigned short arrSize = sizeof(waveArray)/sizeof(waveArray[0]);
 	
     while (1) 
     {
+		
 		i++;
-		if(i == SAMPLE_RATE){
+		if(i == arrSize){
 			i = 0;
+		}
+		output = (unsigned short)waveArray[i];
+		
+		timer++;
+		if(timer == SAMPLE_RATE){		//TODO CHANGE
+			timer = 0;
 			lights = ~lights;
 		}
-		output = waveArray[i];
 		
-		PORTC = lights;
 		PORTA = (char)(output);
 		PORTB = (char)(output >> 8);
+		PORTC = lights;
 		
 		while(!TimerFlag);
 		TimerFlag = 0;
@@ -87,17 +95,20 @@ int main(void)
 void fillArray(unsigned short *array){
 	
 	double frequency = 2;
-	//double period = 1.0 / frequency;
+	short samples_per_period = SAMPLE_RATE / (unsigned short)(frequency);
 	double amplitude = 5.0;
 	double timePassed = 0.0;
 	double phase = 0;
+	double delta_T = (double)(1.0 / (double)(SAMPLE_RATE));
 	unsigned short i = 0x00;
 	
+	array = (unsigned short *) realloc(array, samples_per_period);
 	
-	for(i = 0; i < SAMPLE_RATE; i++){
+	for(i = 0; i < samples_per_period; i++){	//sample rate is used
 		array[i] = (short)(amplitude * frequency * fmod((timePassed + phase), (1/frequency)) * VOLTAGE_SCALER);
-		timePassed += (double)(1.0 / (double)(SAMPLE_RATE));
+		timePassed += delta_T;
 	}
+	
 	return;
 }
 
