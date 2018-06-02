@@ -21,8 +21,8 @@ void updateParameterValue(unsigned char * array){
 	unsigned char i;
 	char str[2];
 	for(i = 0; i < 4; i++){
-		str[0] = array[i + 1] / 10 + 48;
-		str[1] = array[i + 1] % 10 + 48;
+		str[0] = array[i] / 10 + 48;
+		str[1] = array[i] % 10 + 48;
 		
 		LCD_Cursor(17 + i * 4);
 		LCD_WriteData(str[0]);

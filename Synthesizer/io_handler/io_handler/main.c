@@ -67,6 +67,8 @@ void initExtern(){
 
 //menuTask handles the main I/O
 unsigned char menuTask(unsigned char currentState){
+	unsigned char parameters[4];
+	getPotentiometerSnapshot(parameters);
 	
 	switch(currentState){	//state transition calculations
 		case(INIT):
@@ -108,6 +110,9 @@ unsigned char menuTask(unsigned char currentState){
 			else if(isPressed()){
 				previousMenuState = OSC1WAIT;
 				currentState = RELEASE;	//OSC_1 Release
+				LCD_DisplayString(1, "A   D   S   R");
+				updateParameterValue(parameters);
+				
 			}
 			break;
 			
@@ -165,11 +170,16 @@ unsigned char menuTask(unsigned char currentState){
 	
 	switch(currentState){
 		case(OSC1PREP):
-			LCD_DisplayString(1, "OSCILLATOR 1");
+			LCD_DisplayString(1, "  OSCILLATOR 1");
+			LCD_Cursor(0);
+			break;
+		
+		case(OSC1WAIT):
+			break;
 			
 		case(OSC1MAIN):
-			
-			updateParameterValue(menuValues);
+			updateParameterValue(parameters);
+			break;
 			
 	}
 	return currentState;
