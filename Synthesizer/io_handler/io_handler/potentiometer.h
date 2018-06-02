@@ -12,7 +12,6 @@ unsigned char scaleTo100(){
 	return (ADC - 32.0)/9.77;	//THIS EQUATION IS UNIQUE TO THE POTENTIOMETERS I USED
 }
 
-unsigned char scaleTo
 unsigned char captureSingleKnob(unsigned char pos){
 	ADMUX = pos;
 	_delay_us(200);		//DONT USE asm("nop") -- causes read error

@@ -1,5 +1,6 @@
 #ifndef SYNTH_MODULE_H
 #define SYNTH_MODULE_H
+#include "potentiometer.h"
 
 typedef struct Oscillator{		//
 	unsigned char waveForm;
