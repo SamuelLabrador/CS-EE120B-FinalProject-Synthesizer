@@ -26,6 +26,7 @@ unsigned char menuTask(unsigned char);
 int main(void)
 {
     DDRA = 0x00; PORTA = 0xFF;	//potentiometer inputs
+	DDRB = 0xFF; PORTB = 0x00;
 	DDRC = 0xFF; PORTC = 0x00;	//LCD data out
 	DDRD = 0xFF; PORTD = 0x00;	//bits 6 and 4 input Rx in || everything else is output. Tx and LCD control
 	
@@ -36,7 +37,8 @@ int main(void)
 	task menu;
 	tasks[0] = menu;
 	
-	tasks[0].period = 50;
+	tasks[0].period = 5;
+	tasks[0].state = 0;
 	tasks[0].elapsedTime = 0;
 	tasks[0].TickFunction = &menuTask;
 	
@@ -67,11 +69,16 @@ void initExtern(){
 
 //menuTask handles the main I/O
 unsigned char menuTask(unsigned char currentState){
+	
 	unsigned char parameters[4];
 	getPotentiometerSnapshot(parameters);
 	
 	switch(currentState){	//state transition calculations
 		case(INIT):
+			osc[0] = 1;		//waveform
+			osc[1] = 99;	//level
+			osc[2] = 2;		//octave
+			osc[3] = 0;		//detune
 			currentState = calcMenu();
 			break;
 		
@@ -79,26 +86,37 @@ unsigned char menuTask(unsigned char currentState){
 			if(isPressed()){
 				return currentState; //NO ACTIONS PREFORMED IF BUTTON IS STILL PRESSED, can return immediately
 			}
-			else if(previousMenuState == OSC1WAIT){
-				currentState = OSC1MAIN;	
-			}
-			else if(previousMenuState == OSC1MAIN){
-				currentState = calcMenu();
-			}
-			else if(previousMenuState == FILTWAIT){
-				currentState = FILTMAIN;
-			}
-			else if(previousMenuState == FILTMAIN){
-				currentState = calcMenu();
-			}
-			else if(previousMenuState = AMPWAIT){
-				currentState = AMPMAIN;
-			}
-			else if(previousMenuState = AMPMAIN){
-				currentState = calcMenu();
+			
+			switch(previousMenuState){
+				case(OSC1WAIT):
+					currentState = OSC1MAIN;
+					break;
+
+				case(OSC1MAIN):
+					currentState = calcMenu();
+					break;
+					
+				case(FILTWAIT):
+					currentState = FILTMAIN;
+					break;
+					
+				case(FILTMAIN):
+					currentState = calcMenu();
+					break;
+					
+				case(AMPWAIT):
+					currentState = AMPMAIN;
+					break;
+					
+				case(AMPMAIN):
+					currentState = calcMenu();
+					break;
+					
+				default:
+					LCD_DisplayString(1, "NO BACK STATE FOUND!");
 			}
 			break;
-		
+
 		case(OSC1PREP)://OSC_1 PREP
 			currentState = OSC1WAIT;
 			break;
@@ -110,8 +128,8 @@ unsigned char menuTask(unsigned char currentState){
 			else if(isPressed()){
 				previousMenuState = OSC1WAIT;
 				currentState = RELEASE;	//OSC_1 Release
-				LCD_DisplayString(1, "A   D   S   R");
-				updateParameterValue(parameters);
+				LCD_DisplayString(1, "WAV"); //LVL ");//OCT DET");
+				updateOscParameter(parameters);
 				
 			}
 			break;
@@ -132,8 +150,10 @@ unsigned char menuTask(unsigned char currentState){
 				currentState = calcMenu();
 			}
 			else if(isPressed()){
-				previousMenuState = FILTMAIN;
+				previousMenuState = FILTWAIT;
 				currentState = RELEASE;	//OSC_1 Release
+				LCD_DisplayString(1, "AMT RES"); //MOD TYPE");
+				updateFilterParameter(parameters);
 			}
 			break;
 			
@@ -141,6 +161,7 @@ unsigned char menuTask(unsigned char currentState){
 			if(isPressed()){
 				previousMenuState = FILTMAIN;
 				currentState = RELEASE; //WAIT FOR RELEASE
+				
 			}
 			break;
 			
@@ -155,36 +176,61 @@ unsigned char menuTask(unsigned char currentState){
 			else if(isPressed()){
 				previousMenuState = AMPWAIT;
 				currentState = RELEASE;	//OSC_1 Release
+				LCD_DisplayString(1, "A   D   S   R");
+				updateAmpParameter(parameters);
 			}
 			break;
-			
+		
 		case(AMPMAIN):
+			
 			if(isPressed()){
 				previousMenuState = AMPMAIN;
 				currentState = RELEASE; //WAIT FOR RELEASE
 			}
 			break;
+			
 		default:
-			LCD_DisplayString(1, "ERROR default state");
+			LCD_DisplayString(1, "ERROR no defined state transition");
 	}
 	
-	switch(currentState){
+	switch(currentState){	//state actions
 		case(OSC1PREP):
 			LCD_DisplayString(1, "  OSCILLATOR 1");
 			LCD_Cursor(0);
 			break;
-		
-		case(OSC1WAIT):
-			break;
 			
 		case(OSC1MAIN):
-			updateParameterValue(parameters);
+			updateOscParameter(parameters);
 			break;
 			
+		case(FILTPREP):
+			LCD_DisplayString(1, "     FILTER");
+			LCD_Cursor(0);
+			break;
+				
+		case(FILTMAIN):
+			updateFilterParameter(parameters);
+			break;
+			
+		case(AMPPREP):
+			LCD_DisplayString(1, "   AMPLIFIER");
+			LCD_Cursor(0);
+			break;
+			
+		case(AMPMAIN):
+			updateAmpParameter(parameters);
+			break;
+			
+		case(RELEASE):
+			break;
 	}
 	return currentState;
+}
+
+unsigned char midiTask(unsigned char currentState){
 	
+}
+
+unsigned char usartTask(){
 	
-	
-	return 0x01;
 }
