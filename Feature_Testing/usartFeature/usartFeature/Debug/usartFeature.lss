@@ -15,19 +15,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .debug_aranges 00000080  00000000  00000000  0000031c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00000a58  00000000  00000000  0000039c  2**0
+  6 .debug_info   00000a2e  00000000  00000000  0000039c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000008bb  00000000  00000000  00000df4  2**0
+  7 .debug_abbrev 000008aa  00000000  00000000  00000dca  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   0000041f  00000000  00000000  000016af  2**0
+  8 .debug_line   0000040d  00000000  00000000  00001674  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000104  00000000  00000000  00001ad0  2**2
+  9 .debug_frame  00000104  00000000  00000000  00001a84  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000004e7  00000000  00000000  00001bd4  2**0
+ 10 .debug_str    000004de  00000000  00000000  00001b88  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000082  00000000  00000000  000020bb  2**0
+ 11 .debug_loc    0000008e  00000000  00000000  00002066  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000070  00000000  00000000  0000213d  2**0
+ 12 .debug_ranges 00000070  00000000  00000000  000020f4  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -160,7 +160,7 @@ void TimerISR() {
   d0:	80 83       	st	Z, r24
   d2:	8e e0       	ldi	r24, 0x0E	; 14
   d4:	80 93 c2 00 	sts	0x00C2, r24	; 0x8000c2 <__TEXT_REGION_LENGTH__+0x7e00c2>
-  d8:	87 e6       	ldi	r24, 0x67	; 103
+  d8:	8f e1       	ldi	r24, 0x1F	; 31
   da:	80 93 c4 00 	sts	0x00C4, r24	; 0x8000c4 <__TEXT_REGION_LENGTH__+0x7e00c4>
   de:	10 92 c5 00 	sts	0x00C5, r1	; 0x8000c5 <__TEXT_REGION_LENGTH__+0x7e00c5>
   e2:	08 95       	ret
@@ -292,60 +292,50 @@ int main(void)
 	
 	initUSART();	
  1e0:	73 df       	rcall	.-282    	; 0xc8 <initUSART>
-	TimerSet(500);
- 1e2:	64 ef       	ldi	r22, 0xF4	; 244
- 1e4:	71 e0       	ldi	r23, 0x01	; 1
+	TimerSet(250);
+ 1e2:	6a ef       	ldi	r22, 0xFA	; 250
+ 1e4:	70 e0       	ldi	r23, 0x00	; 0
  1e6:	80 e0       	ldi	r24, 0x00	; 0
  1e8:	90 e0       	ldi	r25, 0x00	; 0
 	TimerOn();
  1ea:	84 df       	rcall	.-248    	; 0xf4 <TimerSet>
- 1ec:	94 df       	rcall	.-216    	; 0x116 <TimerOn>
-int main(void)
-{
-	DDRD = 0xFF; PORTD = 0x00;
-	DDRC = 0xFF; PORTC = 0x00;
+	    /*
+			PORTC = USART_Receive();
+					
+		*/
 	
-	unsigned char lights = 0x01;
- 1ee:	11 e0       	ldi	r17, 0x01	; 1
-//Functionality - checks if USART is ready to send
-//Parameter: None
-//Returns: 1 if true else 0
-unsigned char USART_IsSendReady()
-{
-	return (UCSR0A & (1 << UDRE0));
- 1f0:	c0 ec       	ldi	r28, 0xC0	; 192
- 1f2:	d0 e0       	ldi	r29, 0x00	; 0
- 1f4:	88 81       	ld	r24, Y
-	TimerSet(500);
-	TimerOn();
-    while (1) 
-    {
-		
-		if(USART_IsSendReady()){// &&  USART_HasTransmitted()){
- 1f6:	85 ff       	sbrs	r24, 5
- 1f8:	fd cf       	rjmp	.-6      	; 0x1f4 <main+0x1e>
-			lights = lights << 1;
- 1fa:	11 0f       	add	r17, r17
-			if(lights == 0){
- 1fc:	09 f4       	brne	.+2      	; 0x200 <main+0x2a>
-				lights = 1;
-			}
-			USART_Send(lights, 0);
- 1fe:	11 e0       	ldi	r17, 0x01	; 1
- 200:	60 e0       	ldi	r22, 0x00	; 0
- 202:	81 2f       	mov	r24, r17
- 204:	6f df       	rcall	.-290    	; 0xe4 <USART_Send>
-//Functionality - checks if USART has transmitted data
-//Parameter: None
-//Returns: 1 if true else 0
-unsigned char USART_HasTransmitted()
-{
-	return (UCSR0A & (1 << TXC0));
- 206:	88 81       	ld	r24, Y
-			while(!USART_HasTransmitted());
- 208:	86 ff       	sbrs	r24, 6
- 20a:	fd cf       	rjmp	.-6      	; 0x206 <main+0x30>
- 20c:	f3 cf       	rjmp	.-26     	; 0x1f4 <main+0x1e>
+	USART_Send(lights);
+ 1ec:	94 df       	rcall	.-216    	; 0x116 <TimerOn>
+ 1ee:	81 e0       	ldi	r24, 0x01	; 1
+ 1f0:	79 df       	rcall	.-270    	; 0xe4 <USART_Send>
+	
+	lights = lights << 1;
+ 1f2:	c2 e0       	ldi	r28, 0x02	; 2
+ 1f4:	01 c0       	rjmp	.+2      	; 0x1f8 <main+0x22>
+	if(lights == 0){
+		lights = 1;
+ 1f6:	c1 e0       	ldi	r28, 0x01	; 1
+	}
+	while(!TimerFlag);
+ 1f8:	80 91 08 01 	lds	r24, 0x0108	; 0x800108 <TimerFlag>
+ 1fc:	88 23       	and	r24, r24
+	TimerFlag = 0;
+ 1fe:	e1 f3       	breq	.-8      	; 0x1f8 <main+0x22>
+ 200:	10 92 08 01 	sts	0x0108, r1	; 0x800108 <TimerFlag>
+	    /*
+			PORTC = USART_Receive();
+					
+		*/
+	
+	USART_Send(lights);
+ 204:	8c 2f       	mov	r24, r28
+ 206:	6e df       	rcall	.-292    	; 0xe4 <USART_Send>
+	
+	lights = lights << 1;
+ 208:	cc 0f       	add	r28, r28
+	if(lights == 0){
+ 20a:	a9 f3       	breq	.-22     	; 0x1f6 <main+0x20>
+ 20c:	f5 cf       	rjmp	.-22     	; 0x1f8 <main+0x22>
 
 0000020e <_exit>:
  20e:	f8 94       	cli

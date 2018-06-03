@@ -76,27 +76,24 @@ int main(void)
 	unsigned char lights = 0x01;
 	
 	initUSART();	
-	TimerSet(500);
+	TimerSet(250);
 	TimerOn();
     while (1) 
     {
-		
-		if(USART_IsSendReady()){// &&  USART_HasTransmitted()){
-			lights = lights << 1;
-			if(lights == 0){
-				lights = 1;
-			}
-			USART_Send(lights, 0);
-			while(!USART_HasTransmitted());
-		}
-		
-		/*
-		if(USART_HasReceived()){
+	    /*
 			PORTC = USART_Receive();
-		}
-		
-		while(!TimerFlag);
-		TimerFlag = 0;
+					
+		*/
+	
+	USART_Send(lights);
+	
+	lights = lights << 1;
+	if(lights == 0){
+		lights = 1;
+	}
+	while(!TimerFlag);
+	TimerFlag = 0;
+		/*
 		*/
 	}
 }

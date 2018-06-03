@@ -9,7 +9,7 @@
 
 // USART Setup Values
 #define F_CPU 16000000UL // Assume uC operates at 8MHz
-#define BAUD_RATE 9600
+#define BAUD_RATE 31250	//MIDI BAUD RATE
 #define BAUD_PRESCALE (((F_CPU / (BAUD_RATE * 16UL))) - 1)
 #define URSEL URSEL
 ////////////////////////////////////////////////////////////////////////////////
@@ -21,9 +21,10 @@ void initUSART()
 	// Turn on the reception circuitry
 	// Use 8-bit character sizes - URSEL bit set to select the UCRSC register
 	// Turn on receiver and transmitter
-	UCSR0B |= (1 << RXEN0)  | (1 << TXEN0);
+	UCSR0B |= (1 << RXEN0) | (1 << TXEN0);	//RX0 for recieving midi signal	|| TX0 for sending data to the data processor
 	UCSR0C = (1 << USBS0) | (3 << UCSZ00);
-	// Load lower 8-bits of the baud rate value into the low byte of the UBRR register
+	
+// Load lower 8-bits of the baud rate value into the low byte of the UBRR register
 	UBRR0L = BAUD_PRESCALE;
 	// Load upper 8-bits of the baud rate value into the high byte of the UBRR register
 	UBRR0H = (BAUD_PRESCALE >> 8);
@@ -67,7 +68,7 @@ void USART_Flush()
 //Functionality - Sends an 8-bit char value
 //Parameter: Takes a single unsigned char value
 //Returns: None
-void USART_Send(unsigned char sendMe, unsigned char usartNum)
+void USART_Send(unsigned char sendMe)
 {
 	while( !(UCSR0A & (1 << UDRE0)) );
 	UDR0 = sendMe;
