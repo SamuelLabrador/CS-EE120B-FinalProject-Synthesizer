@@ -30,5 +30,22 @@ unsigned char isPressed(){
 	return (~PINA & 0x20);
 }
 
+void copyValues(unsigned char * copy, unsigned char * target){
+	for(unsigned char i = 0; i < 4; i++){
+		copy[i] = target[i];
+	}
+}
+
+void updateValues(unsigned char * parameters, unsigned char * oldValues, unsigned char * module, unsigned char * isUpdated){
+	for(unsigned char i = 0; i < 4; i++){
+		if((*isUpdated & (1 << i)) == (1 << i)){
+			module[i] = parameters[i];
+		}
+		else if(oldValues[i] != parameters[i]){
+			module[i] = parameters[i];
+			*isUpdated |= (1 << i);
+		}
+	}
+}
 
 #endif
