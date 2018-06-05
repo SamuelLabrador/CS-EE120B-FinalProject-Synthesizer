@@ -37,14 +37,14 @@ int main(void)
 	task menu;
 	tasks[0] = menu;
 	
-	tasks[0].period = 5;
+	tasks[0].period = 1;
 	tasks[0].state = 0;
 	tasks[0].elapsedTime = 0;
 	tasks[0].TickFunction = &menuTask;
 	
 	ADC_init();		//init ADC
 	LCD_init();		//init LCD
-	TimerSet(5);	//set timer interrupt cycle period
+	TimerSet(50);	//set timer interrupt cycle period
 	TimerOn();		//enable timer
 	
     while (1) 
@@ -69,9 +69,12 @@ void initExtern(){
 
 //menuTask handles the main I/O
 unsigned char menuTask(unsigned char currentState){
+
 	
 	unsigned char parameters[4];
+	
 	getPotentiometerSnapshot(parameters);
+	//updateAmpParameter(parameters);
 	
 	switch(currentState){	//state transition calculations
 		case(INIT):

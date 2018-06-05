@@ -5,7 +5,7 @@
 #define F_CPU 16000000UL
 
 void ADC_init() {
-	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADATE);
+	ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADATE);	//0x06 MIGHT FIX PROBLEM
 }
 
 unsigned char scaleTo100(){		
@@ -13,7 +13,8 @@ unsigned char scaleTo100(){
 }
 
 unsigned char captureSingleKnob(unsigned char pos){
-	ADMUX = pos;
+	ADMUX = 0b00011111 & pos;	//MIGHT CAUSE ADC PROBLEMS
+	asm("nop");
 	_delay_us(500);		//DONT USE asm("nop") -- causes read error
 	return scaleTo100();
 }

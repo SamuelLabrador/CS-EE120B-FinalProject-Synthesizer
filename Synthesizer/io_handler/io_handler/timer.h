@@ -10,7 +10,7 @@ extern unsigned long _avr_timer_cntcurr = 0;
 
 void TimerOn(){
 	TCCR1B  = 0x0B;		//250,000 Ticks Per Second
-	OCR1A = 250;		//ISR is called to every 1 millisecond
+	OCR1A = 125;		//ISR is called to every 1 millisecond
 	TIMSK1 = 0x02;		//enable CTC mode
 	TCNT1 = 0;			//Timer count register
 	_avr_timer_cntcurr = _avr_timer_M;
