@@ -80,20 +80,22 @@ int main(void)
 	TimerOn();
     while (1) 
     {
+		PORTC = USART_Receive();
 	    /*
-			PORTC = USART_Receive();
+			
 					
 		*/
 	
-	USART_Send(lights);
 	
-	lights = lights << 1;
-	if(lights == 0){
-		lights = 1;
-	}
-	while(!TimerFlag);
-	TimerFlag = 0;
 		/*
+		USART_Send(lights);
+		
+		lights = lights << 1;
+		if(lights == 0){
+			lights = 1;
+		}
+		while(!TimerFlag);
+		TimerFlag = 0;
 		*/
 	}
 }

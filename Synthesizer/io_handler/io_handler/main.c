@@ -8,54 +8,83 @@
 
 #include <avr/io.h>
 #include "scheduler.h"
+#include "usart.h"
 #include "timer.h"
 #include "synth_module.h"
 #include "potentiometer.h"	//includes menu functions
 #include "menu.h"
 #include "io.c"
 
+#define NUM_OF_TASKS 2
+
 //GLOBAL VARIABLES
-task tasks[1];						//menuTask
-unsigned char menuValues[4];
+task tasks[NUM_OF_TASKS];						//menuTask
+task menu, usart;
 unsigned char previousMenuState;	//help reduce number of states
-unsigned char osc[4], amp[4], filt[4];
+unsigned char osc[4];
+unsigned char amp[4];
+unsigned char filt[4];
+volatile unsigned char sendFlag = 0;
 
 //forward function declerations
 void initExtern();	//used to initialize external variables
-unsigned char menuTask(unsigned char);
+unsigned char menuTask(unsigned char);	//states defined in menu.h
+unsigned char usartTask(unsigned char);
 
 int main(void)
 {
 	DDRA = 0x00; PORTA = 0xFF;	//potentiometer inputs
-	DDRB = 0xFF; PORTB = 0x00;
+	DDRB = 0xFF; PORTB = 0x00;	
 	DDRC = 0xFF; PORTC = 0x00;	//LCD data out
 	DDRD = 0xFF; PORTD = 0x00;	//bits 6 and 4 input Rx in || everything else is output. Tx and LCD control
 	
 	initExtern();
 	
+	// Period for the tasks///////////////////////////////////////////////////
+	unsigned long int SMMenu_calc = 50;	//menu period (ms)
+	unsigned long int SMUsart_calc = 50;	//usart send period (ms)
+	
+	//Calculating GCD
+	unsigned long int tmpGCD = 1;
+	tmpGCD = findGCD(SMMenu_calc, SMUsart_calc);
+
+	//Greatest common divisor for all tasks or smallest time unit for tasks.
+	unsigned long int GCD = tmpGCD;
+
+	//Recalculate GCD periods for scheduler
+	unsigned long int menuPeriod = SMMenu_calc/GCD;
+	unsigned long int usartPeriod = SMUsart_calc/GCD;
+	/////////////////////////////////////////////////////////////////////////
+	
 	unsigned char i = 0x00;
 	unsigned char taskCount = 1;
-	task menu;
 	
 	tasks[0] = menu;
-	tasks[0].period = 1;
+	tasks[0].period = menuPeriod;
 	tasks[0].state = 0;
 	tasks[0].elapsedTime = 0;
 	tasks[0].TickFunction = &menuTask;
 	
+	tasks[1] = usart;
+	tasks[1].period = usartPeriod;
+	tasks[1].state = 0;
+	tasks[1].elapsedTime = 0;
+	tasks[1].TickFunction = &usartTask;
+	
 	ADC_init();		//init ADC
 	LCD_init();		//init LCD
-	TimerSet(5);	//set timer interrupt cycle period
+	initUSART();	//init USART communications
+	TimerSet(GCD);	//set timer interrupt cycle period
 	TimerOn();		//enable timer
 	
 	while (1)
 	{
-		for(i = 0; i < taskCount; i++){
+		for(i = 0; i < NUM_OF_TASKS; i++){
 			if(tasks[i].elapsedTime >= tasks[i].period){
 				tasks[i].state = tasks[i].TickFunction(tasks[i].state);
 				tasks[i].elapsedTime = 0;
 			}
-			tasks[i].elapsedTime += 5;
+			tasks[i].elapsedTime += 1;
 		}
 		TimerFlag = 0;
 		while(!TimerFlag);
@@ -69,6 +98,7 @@ void initExtern(){
 }
 
 
+//global variable for Menu Tick
 unsigned char isUpdated = 0x00; //0000 0000
 unsigned char oldValues[4];
 
@@ -242,3 +272,7 @@ unsigned char menuTask(unsigned char currentState){
 	return currentState;
 }
 
+unsigned char usartTask(unsigned char state){
+	USART_Send(amp[0]);
+	return state;
+}

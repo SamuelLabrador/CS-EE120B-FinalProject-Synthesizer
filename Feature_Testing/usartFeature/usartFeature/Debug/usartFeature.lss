@@ -3,31 +3,31 @@ usartFeature.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000004  00800100  00000212  000002a6  2**0
+  0 .data         00000004  00800100  000001f8  0000028c  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000212  00000000  00000000  00000094  2**1
+  1 .text         000001f8  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000005  00800104  00800104  000002aa  2**0
+  2 .bss          00000005  00800104  00800104  00000290  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000002aa  2**0
+  3 .comment      00000030  00000000  00000000  00000290  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002dc  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002c0  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000080  00000000  00000000  0000031c  2**0
+  5 .debug_aranges 00000080  00000000  00000000  00000300  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00000a2e  00000000  00000000  0000039c  2**0
+  6 .debug_info   00000a11  00000000  00000000  00000380  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000008aa  00000000  00000000  00000dca  2**0
+  7 .debug_abbrev 0000089f  00000000  00000000  00000d91  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   0000040d  00000000  00000000  00001674  2**0
+  8 .debug_line   000003e3  00000000  00000000  00001630  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000104  00000000  00000000  00001a84  2**2
+  9 .debug_frame  00000104  00000000  00000000  00001a14  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000004de  00000000  00000000  00001b88  2**0
+ 10 .debug_str    000004de  00000000  00000000  00001b18  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    0000008e  00000000  00000000  00002066  2**0
+ 11 .debug_loc    00000063  00000000  00000000  00001ff6  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000070  00000000  00000000  000020f4  2**0
+ 12 .debug_ranges 00000070  00000000  00000000  00002059  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -116,8 +116,8 @@ Disassembly of section .text:
   98:	11 e0       	ldi	r17, 0x01	; 1
   9a:	a0 e0       	ldi	r26, 0x00	; 0
   9c:	b1 e0       	ldi	r27, 0x01	; 1
-  9e:	e2 e1       	ldi	r30, 0x12	; 18
-  a0:	f2 e0       	ldi	r31, 0x02	; 2
+  9e:	e8 ef       	ldi	r30, 0xF8	; 248
+  a0:	f1 e0       	ldi	r31, 0x01	; 1
   a2:	00 e0       	ldi	r16, 0x00	; 0
   a4:	0b bf       	out	0x3b, r16	; 59
   a6:	02 c0       	rjmp	.+4      	; 0xac <__do_copy_data+0x14>
@@ -141,7 +141,7 @@ Disassembly of section .text:
   be:	b2 07       	cpc	r27, r18
   c0:	e1 f7       	brne	.-8      	; 0xba <.do_clear_bss_loop>
   c2:	89 d0       	rcall	.+274    	; 0x1d6 <main>
-  c4:	a4 c0       	rjmp	.+328    	; 0x20e <_exit>
+  c4:	97 c0       	rjmp	.+302    	; 0x1f4 <_exit>
 
 000000c6 <__bad_interrupt>:
   c6:	9c cf       	rjmp	.-200    	; 0x0 <__vectors>
@@ -165,13 +165,13 @@ void TimerISR() {
   de:	10 92 c5 00 	sts	0x00C5, r1	; 0x8000c5 <__TEXT_REGION_LENGTH__+0x7e00c5>
   e2:	08 95       	ret
 
-000000e4 <USART_Send>:
+000000e4 <USART_Receive>:
   e4:	e0 ec       	ldi	r30, 0xC0	; 192
   e6:	f0 e0       	ldi	r31, 0x00	; 0
-  e8:	90 81       	ld	r25, Z
-  ea:	95 ff       	sbrs	r25, 5
-  ec:	fd cf       	rjmp	.-6      	; 0xe8 <USART_Send+0x4>
-  ee:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7e00c6>
+  e8:	80 81       	ld	r24, Z
+  ea:	88 23       	and	r24, r24
+  ec:	ec f7       	brge	.-6      	; 0xe8 <USART_Receive+0x4>
+  ee:	80 91 c6 00 	lds	r24, 0x00C6	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7e00c6>
   f2:	08 95       	ret
 
 000000f4 <TimerSet>:
@@ -299,46 +299,16 @@ int main(void)
  1e8:	90 e0       	ldi	r25, 0x00	; 0
 	TimerOn();
  1ea:	84 df       	rcall	.-248    	; 0xf4 <TimerSet>
-	    /*
-			PORTC = USART_Receive();
-					
-		*/
-	
-	USART_Send(lights);
  1ec:	94 df       	rcall	.-216    	; 0x116 <TimerOn>
- 1ee:	81 e0       	ldi	r24, 0x01	; 1
- 1f0:	79 df       	rcall	.-270    	; 0xe4 <USART_Send>
-	
-	lights = lights << 1;
- 1f2:	c2 e0       	ldi	r28, 0x02	; 2
- 1f4:	01 c0       	rjmp	.+2      	; 0x1f8 <main+0x22>
-	if(lights == 0){
-		lights = 1;
- 1f6:	c1 e0       	ldi	r28, 0x01	; 1
-	}
-	while(!TimerFlag);
- 1f8:	80 91 08 01 	lds	r24, 0x0108	; 0x800108 <TimerFlag>
- 1fc:	88 23       	and	r24, r24
-	TimerFlag = 0;
- 1fe:	e1 f3       	breq	.-8      	; 0x1f8 <main+0x22>
- 200:	10 92 08 01 	sts	0x0108, r1	; 0x800108 <TimerFlag>
-	    /*
-			PORTC = USART_Receive();
-					
-		*/
-	
-	USART_Send(lights);
- 204:	8c 2f       	mov	r24, r28
- 206:	6e df       	rcall	.-292    	; 0xe4 <USART_Send>
-	
-	lights = lights << 1;
- 208:	cc 0f       	add	r28, r28
-	if(lights == 0){
- 20a:	a9 f3       	breq	.-22     	; 0x1f6 <main+0x20>
- 20c:	f5 cf       	rjmp	.-22     	; 0x1f8 <main+0x22>
+    while (1) 
+    {
+		PORTC = USART_Receive();
+ 1ee:	7a df       	rcall	.-268    	; 0xe4 <USART_Receive>
+ 1f0:	88 b9       	out	0x08, r24	; 8
+ 1f2:	fd cf       	rjmp	.-6      	; 0x1ee <main+0x18>
 
-0000020e <_exit>:
- 20e:	f8 94       	cli
+000001f4 <_exit>:
+ 1f4:	f8 94       	cli
 
-00000210 <__stop_program>:
- 210:	ff cf       	rjmp	.-2      	; 0x210 <__stop_program>
+000001f6 <__stop_program>:
+ 1f6:	ff cf       	rjmp	.-2      	; 0x1f6 <__stop_program>

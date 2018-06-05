@@ -8,12 +8,10 @@
 #define USART_H
 
 // USART Setup Values
-#define F_CPU 8000000UL // Assume uC operates at 8MHz
-#define BAUD_RATE 31250
+#define F_CPU 16000000UL // Assume uC operates at 8MHz
+#define BAUD_RATE 31250	//MIDI BAUD RATE
 #define BAUD_PRESCALE (((F_CPU / (BAUD_RATE * 16UL))) - 1)
 #define URSEL URSEL
-
-typedef enum usartState {uINIT, uSEND, uWAIT, u} USART_STATE;
 ////////////////////////////////////////////////////////////////////////////////
 //Functionality - Initializes TX and RX on PORT D
 //Parameter: None
@@ -23,9 +21,10 @@ void initUSART()
 	// Turn on the reception circuitry
 	// Use 8-bit character sizes - URSEL bit set to select the UCRSC register
 	// Turn on receiver and transmitter
-	UCSR0B |= (1 << RXEN0)  | (1 << TXEN0);
+	UCSR0B |= (1 << RXEN0) | (1 << TXEN0);	//RX0 for recieving midi signal	|| TX0 for sending data to the data processor
 	UCSR0C = (1 << USBS0) | (3 << UCSZ00);
-	// Load lower 8-bits of the baud rate value into the low byte of the UBRR register
+	
+// Load lower 8-bits of the baud rate value into the low byte of the UBRR register
 	UBRR0L = BAUD_PRESCALE;
 	// Load upper 8-bits of the baud rate value into the high byte of the UBRR register
 	UBRR0H = (BAUD_PRESCALE >> 8);
@@ -39,7 +38,7 @@ unsigned char USART_IsSendReady()
 	return (UCSR0A & (1 << UDRE0));
 }
 ////////////////////////////////////////////////////////////////////////////////
-//Functionality - checks if USART has recieved data
+//Functionality - checks if USART has transmitted data
 //Parameter: None
 //Returns: 1 if true else 0
 unsigned char USART_HasTransmitted()
@@ -86,4 +85,3 @@ unsigned char USART_Receive()
 }
 
 #endif //USART_H
-
