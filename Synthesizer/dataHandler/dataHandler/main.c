@@ -14,8 +14,8 @@
 
 unsigned char osc[4], filt[4], amp[4]; 
 unsigned char note, noteOn;
-unsigned short waveArray[1291];//5000];//1291];	//lowest period has a total of 1290 values
-
+unsigned short waveArray[2000];//1291];	//lowest period has a total of 1290 values
+unsigned short outputArray[2000];
 //should be good needs testing;
 
 unsigned short arraySize = 0x00;
@@ -25,7 +25,7 @@ unsigned short output = 0x00;
 
 
 ISR(TIMER1_COMPA_vect){
-	output = waveArray[pos] * 5;
+	output = outputArray[pos] * 5;
 	PORTC = output;//(char)(output);
 	PORTB = output;//(char)(output >> 8);
 	pos++;
@@ -43,10 +43,17 @@ int main(void)
 	DDRD = 0x00; PORTD = 0xFF;
 
 	pos = 0;
-	osc[0] = 0;
-	GenerateWaveTable(osc, 100, waveArray, &arraySize);
+	osc[0] = 2;
+	GenerateWaveTable(osc, 50, waveArray, outputArray, &arraySize);
+	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
+	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
+	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
+	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
+	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
 	initUSART();
 	TimerOn();
+ 
+	
  
     while (1) 
     {
