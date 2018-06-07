@@ -58,9 +58,9 @@ void updateOscParameter(unsigned char * array){
 	}
 	else{
 		
-		str[0] = 0x54;
-		str[1] = 0x52;
-		str[2] = 0x49;
+		str[0] = 0x53;	//s
+		str[1] = 0x49;	//i
+		str[2] = 0x4E;	//n
 	}
 
 	for(unsigned char i = 0; i < 3; i++){

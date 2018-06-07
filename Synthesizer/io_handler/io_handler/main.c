@@ -14,6 +14,7 @@
 #include "potentiometer.h"	//includes menu functions
 #include "menu.h"
 #include "io.c"
+#include "pitches.h"
 
 #define NUM_OF_TASKS 2
 
@@ -272,7 +273,10 @@ unsigned char menuTask(unsigned char currentState){
 	return currentState;
 }
 
+unsigned char noteOn = 0x00;
 unsigned char usartTask(unsigned char state){
-	USART_Send(amp[0]);
+
+	sendPacket(0xAA, osc, filt, amp);
+
 	return state;
 }

@@ -15,8 +15,8 @@ unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
 
 void TimerOn(){
-	TCCR1B  = 0x0A;		//1000000 Ticks Per Second
-	OCR1A = 1;			//should call to ISR every 10 microseconds
+	TCCR1B  = 0x0B;		//2000000 Ticks Per Second
+	OCR1A = 250;			//should call to ISR every 10 microseconds
 	TIMSK1 = 0x02;
 	TCNT1 = 0;
 	_avr_timer_cntcurr = _avr_timer_M;
@@ -47,7 +47,7 @@ void TimerSet(unsigned long M){
 void fillArray(unsigned short * array);
 
 #define SAMPLE_RATE (unsigned long)(5000)						//Rate at which ports A and B will be updated
-#define SAMPLE_PERIOD (unsigned long)(100000 / SAMPLE_RATE)		//1 second = 100000 ticks
+#define SAMPLE_PERIOD (unsigned long)( / SAMPLE_RATE)		//1 second = 100000 ticks
 #define VOLTAGE_SCALER (unsigned short)(13107)
 #define frequency (double)(50)
 
@@ -84,9 +84,9 @@ int main(void)
 			lights = ~lights;
 		}
 		
-		PORTA = (char)(output);
+		PORTC = (char)(output);
 		PORTB = (char)(output >> 8);
-		PORTC = lights;
+		PORTA = lights;
 		
 		while(!TimerFlag);
 		TimerFlag = 0;

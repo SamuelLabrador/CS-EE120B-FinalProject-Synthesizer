@@ -85,5 +85,42 @@ unsigned char USART_Receive()
 	return UDR0; // Get and return received data from buffer
 }
 
+void sendPacket(unsigned char note, unsigned char * osc, unsigned char * filt, unsigned char * amp){
+	
+	//bit 7 represents note on or off
+	//[6: 0] note frequency (ie C) || refer to lookup table
+	USART_Send(note);	
+	while(!USART_IsSendReady());
+	
+	//0 = SAW
+	//1 = SQR
+	//2 = TRI
+	USART_Send(osc[0]);
+	USART_Flush();
+	while(!USART_IsSendReady());
+	
+	//filter parameters
+	USART_Send(filt[0]);
+	USART_Flush();
+	while(!USART_IsSendReady());
+	
+	USART_Send(filt[1]);
+	USART_Flush();
+	while(!USART_IsSendReady());
+	
+	//amp parameters
+	USART_Send(amp[0]);
+	USART_Flush();
+	while(!USART_IsSendReady());
+	USART_Send(amp[1]);
+	USART_Flush();
+	while(!USART_IsSendReady());
+	USART_Send(amp[2]);
+	USART_Flush();
+	while(!USART_IsSendReady());
+	USART_Send(amp[3]);
+	while(!USART_IsSendReady());
+}
+
 #endif //USART_H
 

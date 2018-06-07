@@ -7,19 +7,72 @@
 
 #include <avr/io.h>
 #include "usart.h"
+#include "timer.h"
+#include "waveGenerators.h"
+#include "pitches.h"
 #include <avr/interrupt.h>
+
+unsigned char osc[4], filt[4], amp[4]; 
+unsigned char note, noteOn;
+unsigned short waveArray[1291];//5000];//1291];	//lowest period has a total of 1290 values
+
+//should be good needs testing;
+
+unsigned short arraySize = 0x00;
+volatile unsigned short pos = 0x00;
+unsigned char amplitude = 3;
+unsigned short output = 0x00;
+
+
+ISR(TIMER1_COMPA_vect){
+	output = waveArray[pos] * 5;
+	PORTC = output;//(char)(output);
+	PORTB = output;//(char)(output >> 8);
+	pos++;
+	if(pos == arraySize){
+		pos = 0;
+	}
+}
+
+unsigned char getPacket();
 
 int main(void)
 {
-	initUSART();
+	DDRB = 0xFF; PORTB = 0x00;
     DDRC = 0xFF; PORTC = 0x00;
 	DDRD = 0x00; PORTD = 0xFF;
-	
-	unsigned char lights = 0x00;
+
+	pos = 0;
+	osc[0] = 0;
+	GenerateWaveTable(osc, 100, waveArray, &arraySize);
+	initUSART();
+	TimerOn();
+ 
     while (1) 
     {
-		PORTC = USART_Receive();
+		/*
+		getPacket();
 		
-    }
+		if()
+			GenerateWaveTable(osc, sNotePitches[note], waveArray, &arraySize);
+		if(note & 0x80 == 0x80){
+			return 0x01;
+		}
+		return 0;
+		*/
+		
+		
+    }	
+}	
+
+unsigned char getPacket(){
+	while(!USART_HasReceived());
+	note = USART_Receive();
+	USART_Flush();
+	
+	loadArray(osc, 1);
+	loadArray(filt, 2);
+	loadArray(amp, 4);
 }
+
 

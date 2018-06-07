@@ -153,9 +153,9 @@ void TimerOff(){
 
 void TimerISR(){
 	TimerFlag = 1;
-  c8:	8a e0       	ldi	r24, 0x0A	; 10
+  c8:	8b e0       	ldi	r24, 0x0B	; 11
   ca:	80 93 81 00 	sts	0x0081, r24	; 0x800081 <__TEXT_REGION_LENGTH__+0x7e0081>
-  ce:	81 e0       	ldi	r24, 0x01	; 1
+  ce:	8a ef       	ldi	r24, 0xFA	; 250
   d0:	90 e0       	ldi	r25, 0x00	; 0
   d2:	90 93 89 00 	sts	0x0089, r25	; 0x800089 <__TEXT_REGION_LENGTH__+0x7e0089>
   d6:	80 93 88 00 	sts	0x0088, r24	; 0x800088 <__TEXT_REGION_LENGTH__+0x7e0088>

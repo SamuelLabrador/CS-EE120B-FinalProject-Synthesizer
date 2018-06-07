@@ -56,7 +56,7 @@ unsigned char USART_HasReceived()
 }
 ////////////////////////////////////////////////////////////////////////////////
 //Functionality - Flushes the data register
-//Parameter: None
+//Parameter: None0
 //Returns: None
 void USART_Flush()
 {
@@ -82,6 +82,16 @@ unsigned char USART_Receive()
 {
 	while ( !(UCSR0A & (1 << RXC0)) ); // Wait for data to be received
 	return UDR0; // Get and return received data from buffer
+}
+
+
+void loadArray(unsigned char * array, unsigned char amt){
+	
+	for(unsigned char i; i < amt; i++){
+		while(!USART_HasReceived());
+		array[i] = USART_Receive();
+		USART_Flush();
+	}
 }
 
 #endif //USART_H
