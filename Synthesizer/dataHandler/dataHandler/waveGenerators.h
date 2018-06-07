@@ -26,7 +26,7 @@ void generateSqr(unsigned short frequency, unsigned short* waveArray, unsigned s
 			waveArray[i] = 0x01 * VOLTAGE_SCALER;
 		}
 		else{
-			waveArray[i] = 0x00 * VOLTAGE_SCALER;	
+			waveArray[i] = 0x00 * VOLTAGE_SCALER;
 		}
 	}
 	*arraySize = i;
@@ -45,10 +45,10 @@ void generateSin(unsigned short frequency, unsigned short* waveArray, unsigned s
 }
 
 void GenerateWaveTable(	unsigned char * osc,
-						unsigned short frequency,
-						unsigned short * waveArray,
-						unsigned short * outputArray,
-						unsigned short * arraySize){
+unsigned short frequency,
+unsigned short * waveArray,
+unsigned short * outputArray,
+unsigned short * arraySize){
 	switch(osc[0]){
 		case(0):
 		generateSaw(frequency, waveArray, arraySize);
@@ -60,7 +60,6 @@ void GenerateWaveTable(	unsigned char * osc,
 		
 		case(2):
 		generateSin(frequency, waveArray, arraySize);
-		lowPassFrequency(outputArray, waveArray, arraySize, 0.9, 0);
 		break;
 	}
 	
@@ -76,16 +75,28 @@ void copyArray(unsigned short * target, unsigned short* base, unsigned short siz
 void lowPassFrequency(unsigned short* output, unsigned short* input, unsigned short arraySize, double cutoff, double resonance){
 	
 	
-			//set feedback amount given f and q between 0 and 1
+	//set feedback amount given f and q between 0 and 1
 	double fb = resonance + resonance/(1.0 - cutoff);
 	
 	double buf0 = 0;
 	double buf1 = 0;
 	for(unsigned short i = 0; i < arraySize; i++){
-			//for each sample...
-			buf0 = buf0 + cutoff * (input[i] - buf0 + fb * (buf0 - buf1));
-			buf1 = buf1 + cutoff * (buf0 - buf1);
-			output[i] = buf1;
+		//for each sample...
+		buf0 = buf0 + cutoff * (input[i] - buf0 + fb * (buf0 - buf1));
+		buf1 = buf1 + cutoff * (buf0 - buf1);
+		output[i] = buf1;
+	}
+}
+
+unsigned char convertOsc(unsigned char * array){
+	if(array[0] < 33){
+		return 0;
+	}
+	else if(array[0] < 66){
+		return 1;
+	}
+	else {
+		return 2;
 	}
 }
 #endif

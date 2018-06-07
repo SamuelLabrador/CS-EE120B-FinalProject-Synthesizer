@@ -16,7 +16,7 @@
 #include "io.c"
 #include "pitches.h"
 
-#define NUM_OF_TASKS 2
+#define NUM_OF_TASKS 1
 
 //GLOBAL VARIABLES
 task tasks[NUM_OF_TASKS];						//menuTask
@@ -43,7 +43,7 @@ int main(void)
 	
 	// Period for the tasks///////////////////////////////////////////////////
 	unsigned long int SMMenu_calc = 50;	//menu period (ms)
-	unsigned long int SMUsart_calc = 50;	//usart send period (ms)
+	unsigned long int SMUsart_calc = 1;	//usart send period (ms)
 	
 	//Calculating GCD
 	unsigned long int tmpGCD = 1;
@@ -81,6 +81,8 @@ int main(void)
 	while (1)
 	{
 		for(i = 0; i < NUM_OF_TASKS; i++){
+			
+			usartTask(0);
 			if(tasks[i].elapsedTime >= tasks[i].period){
 				tasks[i].state = tasks[i].TickFunction(tasks[i].state);
 				tasks[i].elapsedTime = 0;
@@ -88,7 +90,9 @@ int main(void)
 			tasks[i].elapsedTime += 1;
 		}
 		TimerFlag = 0;
-		while(!TimerFlag);
+		while(!TimerFlag){
+			usartTask(0);
+		}
 	}
 }
 
@@ -113,7 +117,7 @@ unsigned char menuTask(unsigned char currentState){
 		
 		case(INIT):
 			osc[0] = 1;		//waveform = saw
-			filt[0] = 0;	//lp filter amt = 0
+			filt[0] = 99;	//lp filter amt = 0
 			filt[0] = 0;	//resonance = 0
 			amp[0] = 0;		//attack = 0
 			amp[1] = 0;		//decay = 0
@@ -273,10 +277,62 @@ unsigned char menuTask(unsigned char currentState){
 	return currentState;
 }
 
-unsigned char noteOn = 0x00;
+unsigned char note = 0x00;
+unsigned char lights = 0x00;
+
 unsigned char usartTask(unsigned char state){
 
-	sendPacket(0xAA, osc, filt, amp);
-
+	if(USART_HasReceived()){
+		note = USART_Receive();
+		PORTB = note;
+		USART_Flush();
+		if(note & 0x80 == 0x80){
+			sendPacket(0x00, osc, filt, amp);
+		}
+		else{
+			sendPacket(note, osc, filt, amp);
+		}
+	}
 	return state;
 }
+
+/*
+unsigned char usartTask(unsigned char state){
+	if(USART_HasReceived()){	//ONLY SEND MESSAGE IF NOTE IS TURNED ON OR OFF || USART INTERRUPTS AUDIO
+		note = USART_Receive();
+		
+		for(unsigned char i = 0; i < 8	; i++){	//sending the data to dataHandler
+			PORTB = 0xFF;					//send request to transmit data
+			while(PORTA & 0x40 != 0x40);	//wait for read Read ready signal
+			switch(i){
+				case(0):
+					PORTB = note;
+					break;
+				case(1):
+					PORTB = osc[1];
+					break;
+				case(2):
+					PORTB = filt[0];
+					break;
+				case(3):
+					PORTB = filt[1];
+					break;
+				case(4):
+					PORTB = amp[0];
+					break;
+				case(5):
+					PORTB = amp[1];
+					break;
+				case(6):
+					PORTB = amp[2];
+					break;
+				case(7):
+					PORTB = amp[3];
+					break;
+			}
+		}
+		PORTB = 0x00;
+	}
+	return state;
+}
+*/

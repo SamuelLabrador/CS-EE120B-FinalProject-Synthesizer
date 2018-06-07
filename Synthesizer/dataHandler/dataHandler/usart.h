@@ -86,12 +86,14 @@ unsigned char USART_Receive()
 
 
 void loadArray(unsigned char * array, unsigned char amt){
-	
+	PORTA = 0xAA;
 	for(unsigned char i; i < amt; i++){
-		while(!USART_HasReceived());
+		
 		array[i] = USART_Receive();
 		USART_Flush();
 	}
 }
+
+
 
 #endif //USART_H

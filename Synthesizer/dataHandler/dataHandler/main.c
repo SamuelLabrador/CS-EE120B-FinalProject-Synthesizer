@@ -1,10 +1,3 @@
-/*
- * dataHandler.c
- *
- * Created: 6/4/2018 11:36:09 PM
- * Author : samla
- */ 
-
 #include <avr/io.h>
 #include "usart.h"
 #include "timer.h"
@@ -26,8 +19,8 @@ unsigned short output = 0x00;
 
 ISR(TIMER1_COMPA_vect){
 	output = outputArray[pos] * 5;
-	PORTC = output;//(char)(output);
-	PORTB = output;//(char)(output >> 8);
+	PORTC = (char)(output);
+	PORTB = (char)(output >> 8);
 	pos++;
 	if(pos == arraySize){
 		pos = 0;
@@ -38,48 +31,52 @@ unsigned char getPacket();
 
 int main(void)
 {
+	DDRA = 0xFF; PORTA = 0x00;
 	DDRB = 0xFF; PORTB = 0x00;
     DDRC = 0xFF; PORTC = 0x00;
 	DDRD = 0x00; PORTD = 0xFF;
 
 	pos = 0;
 	osc[0] = 2;
-	GenerateWaveTable(osc, 50, waveArray, outputArray, &arraySize);
-	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
-	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
-	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
-	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
-	lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
+	//GenerateWaveTable(osc, 50, waveArray, outputArray, &arraySize);
+	//lowPassFrequency(outputArray, waveArray, arraySize, 0.99, 0);
 	initUSART();
 	TimerOn();
+	TimerOff();
  
 	
- 
+	TimerOn();
     while (1) 
     {
-		/*
-		getPacket();
+		PORTA = note;//converOsc(osc);
 		
-		if()
-			GenerateWaveTable(osc, sNotePitches[note], waveArray, &arraySize);
-		if(note & 0x80 == 0x80){
-			return 0x01;
+		if(USART_HasReceived()){
+			getPacket();
+			TimerOff();
+			if(note == 0x00){
+				
+			}
+			else{\
+				if(note < 35 || note > 88){
+					note = 0x00;
+				}
+				GenerateWaveTable(osc, sNotePitches[note - 35], waveArray, outputArray, &arraySize);
+				lowPassFrequency(outputArray, waveArray, arraySize, filt[0], filt[1]);
+				pos = 0;
+				TimerOn();
+			}
 		}
-		return 0;
-		*/
-		
 		
     }	
 }	
 
 unsigned char getPacket(){
-	while(!USART_HasReceived());
+	TimerOff();
 	note = USART_Receive();
 	USART_Flush();
 	
 	loadArray(osc, 1);
 	loadArray(filt, 2);
 	loadArray(amp, 4);
+	osc[0] = convertOsc(osc);
 }
-
-

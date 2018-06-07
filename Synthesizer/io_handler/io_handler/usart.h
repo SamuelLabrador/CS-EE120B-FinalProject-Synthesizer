@@ -90,6 +90,7 @@ void sendPacket(unsigned char note, unsigned char * osc, unsigned char * filt, u
 	//bit 7 represents note on or off
 	//[6: 0] note frequency (ie C) || refer to lookup table
 	USART_Send(note);	
+	USART_Flush();
 	while(!USART_IsSendReady());
 	
 	//0 = SAW
@@ -119,7 +120,7 @@ void sendPacket(unsigned char note, unsigned char * osc, unsigned char * filt, u
 	USART_Flush();
 	while(!USART_IsSendReady());
 	USART_Send(amp[3]);
-	while(!USART_IsSendReady());
+	USART_Flush();
 }
 
 #endif //USART_H
