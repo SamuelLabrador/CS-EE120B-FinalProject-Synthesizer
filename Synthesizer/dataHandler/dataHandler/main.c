@@ -43,12 +43,10 @@ int main(void)
 	initUSART();
 	TimerOn();
 	TimerOff();
- 
-	
-	TimerOn();
+
     while (1) 
     {
-		PORTA = note;//converOsc(osc);
+		PORTA = osc[0];//converOsc(osc);
 		
 		if(USART_HasReceived()){
 			getPacket();
@@ -56,14 +54,17 @@ int main(void)
 			if(note == 0x00){
 				
 			}
-			else{\
+			else{
 				if(note < 35 || note > 88){
-					note = 0x00;
+					//do nothing note out of range
 				}
-				GenerateWaveTable(osc, sNotePitches[note - 35], waveArray, outputArray, &arraySize);
-				lowPassFrequency(outputArray, waveArray, arraySize, filt[0], filt[1]);
-				pos = 0;
-				TimerOn();
+				else{
+					GenerateWaveTable(osc, sNotePitches[note - 35], waveArray, outputArray, &arraySize);
+					lowPassFrequency(outputArray, waveArray, arraySize, filt[0], filt[1]);
+					pos = 0;
+					TimerOn();
+				}
+				
 			}
 		}
 		

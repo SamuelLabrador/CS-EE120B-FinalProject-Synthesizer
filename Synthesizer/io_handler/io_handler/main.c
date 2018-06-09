@@ -112,7 +112,6 @@ unsigned char menuTask(unsigned char currentState){
 	
 	unsigned char parameters[4];
 	getPotentiometerSnapshot(parameters);
-	
 	switch(currentState){	//state transition calculations
 		
 		case(INIT):
@@ -280,17 +279,23 @@ unsigned char menuTask(unsigned char currentState){
 unsigned char note = 0x00;
 unsigned char lights = 0x00;
 
+unsigned char noteOn;
 unsigned char usartTask(unsigned char state){
 
 	if(USART_HasReceived()){
 		note = USART_Receive();
 		PORTB = note;
 		USART_Flush();
-		if(note & 0x80 == 0x80){
+		if(noteOn == 0xFF && note != 0x00){
+			
+		}
+		else if(note == 0x00){
 			sendPacket(0x00, osc, filt, amp);
+			noteOn = 0x00;
 		}
 		else{
 			sendPacket(note, osc, filt, amp);
+			noteOn = 0xFF;
 		}
 	}
 	return state;

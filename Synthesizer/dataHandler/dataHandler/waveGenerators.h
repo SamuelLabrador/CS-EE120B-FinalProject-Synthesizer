@@ -38,7 +38,7 @@ void generateSin(unsigned short frequency, unsigned short* waveArray, unsigned s
 	double j = 0;
 	double sinMultiplier = 2.0 * PI / (1.0 / frequency);
 	for(i = 0; i < (SAMPLES / frequency); i++){
-		waveArray[i] = (short)((sin(sinMultiplier * j) * 0.5 + 0.5) * 50);
+		waveArray[i] = (short)((sin(sinMultiplier * j) * 0.5 + 0.5) * 150);
 		j += SAMPLE_PERIOD;
 	}
 	*arraySize = i;
