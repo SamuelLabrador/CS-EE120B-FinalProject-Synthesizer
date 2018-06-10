@@ -16,7 +16,7 @@
 #include "io.c"
 #include "pitches.h"
 
-#define NUM_OF_TASKS 1
+#define NUM_OF_TASKS 2
 
 //GLOBAL VARIABLES
 task tasks[NUM_OF_TASKS];						//menuTask
@@ -81,8 +81,6 @@ int main(void)
 	while (1)
 	{
 		for(i = 0; i < NUM_OF_TASKS; i++){
-			
-			usartTask(0);
 			if(tasks[i].elapsedTime >= tasks[i].period){
 				tasks[i].state = tasks[i].TickFunction(tasks[i].state);
 				tasks[i].elapsedTime = 0;
@@ -90,9 +88,7 @@ int main(void)
 			tasks[i].elapsedTime += 1;
 		}
 		TimerFlag = 0;
-		while(!TimerFlag){
-			usartTask(0);
-		}
+		while(!TimerFlag);
 	}
 }
 
